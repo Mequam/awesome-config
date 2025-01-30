@@ -15,8 +15,8 @@ local naughty = require("naughty")
 local menubar = require("menubar")
 local hotkeys_popup = require("awful.hotkeys_popup")
 
---for SMANCY virtual desktops
-local vector = require "vectors"
+local plain = require "custom.plain"
+
 
 os.execute("xcompmgr -c -C -t-5 -l-5 -r4.2 -o.55 &")
 
@@ -448,7 +448,10 @@ clientbuttons = gears.table.join(
 )
 
 -- Set keys
+
+globalkeys = plain.setup_keys(globalkeys)
 root.keys(globalkeys)
+
 -- }}}
 
 -- {{{ Rules
