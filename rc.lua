@@ -15,6 +15,9 @@ local naughty = require("naughty")
 local menubar = require("menubar")
 local hotkeys_popup = require("awful.hotkeys_popup")
 
+--for SMANCY virtual desktops
+local vector = require "vectors"
+
 os.execute("xcompmgr -c -C -t-5 -l-5 -r4.2 -o.55 &")
 
 
