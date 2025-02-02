@@ -341,7 +341,7 @@ globalkeys = gears.table.join(
               {description = "show the menubar", group = "launcher"})
 )
 --enable the virtual desktop key setup
-globalkeys = vdesk.setup_keys(globalkeys)
+globalkeys = vdesk.setup(globalkeys)
 
 clientkeys = gears.table.join(
     awful.key({ modkey,           }, "/",

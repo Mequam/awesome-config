@@ -2,45 +2,55 @@ vector = require "utils.vector"
 awful = require "awful"
 gears = require "gears"
 
-Plain_user_position = {0,0}
-Plain_max_dimensions = {2,2}
+PLAIN_DIMENSIONS = {2,2}
+local START_POSITION = {0,0}
 
---convinence function that walks along the plain
---and loops over the edge
-local function walk_plain(step)
-   Plain_user_position =
-      vector.mod(
-         vector.add(
-            Plain_user_position,step),
-            Plain_max_dimensions
-            )
+
+--gives each screen in the system a position indicating where it is currently
+--looking, for convinence
+local function create_screen_positions()
+   awful.screen.connect_for_each_screen(
+      function(s)
+         s.desktop_position = START_POSITION
+         print(s.desktop_position)
+      end
+   )
 end
 
 --keybinding used to indicate we want to move
 local move_key = {"Mod1","Control"}
 
-local function setup_keys(keyset)
+--convinence function that walks along the plain
+--and loops over the edge
+local function add_mod(plain_position,step)
+   return vector.mod(
+      vector.add(
+         plain_position,step),
+         PLAIN_DIMENSIONS
+         )
+end
+
+--sets up the keys for walking around the plain
+local function setup(keyset)
+   --initilizes the positions on each of the screens
+   create_screen_positions()
+
    --setup movement keys
    return gears.table.join(keyset,
          awful.key(move_key,"Up",function ()
-            walk_plain({0,1})
-            awesome.emit_signal("plain::walk","Up")
+            awesome.emit_signal("plain::walk",{0,1})
          end),
          awful.key(move_key,"Down",function ()
-            walk_plain({0,-1})
-            awesome.emit_signal("plain::walk","Down")
+            awesome.emit_signal("plain::walk",{0,-1})
          end),
          awful.key(move_key,"Left",function ()
-            walk_plain({-1,0})
-            awesome.emit_signal("plain::walk","Left")
+            awesome.emit_signal("plain::walk",{-1,0})
          end),
          awful.key(move_key,"Right",function ()
-            walk_plain({1,0})
-            awesome.emit_signal("plain::walk","Right")
+            awesome.emit_signal("plain::walk",{1,0})
          end)
    )
 end
-
 --takes in a vector and returns an
 --integer mapping for that vector
 --this is inteanded to be the array mapping for the vector
@@ -53,7 +63,7 @@ local function vector_mapping(v)
       local weight = 1
 
       for d = 1, s-1 do
-         weight = weight * Plain_max_dimensions[d]
+         weight = weight * PLAIN_DIMENSIONS[d]
       end
 
       ret_val = ret_val + v[s]*weight
@@ -66,18 +76,18 @@ end
 local function create_tags()
    local ret_val = {}
    local point_count = 1
-   for s=1,#Plain_max_dimensions do
-      point_count = point_count * Plain_max_dimensions[s]
+   for s=1,#PLAIN_DIMENSIONS do
+      point_count = point_count * PLAIN_DIMENSIONS[s]
    end
 
    for s=0,point_count - 1 do
       local sum = s
       local tag = {}
-      for d=1,#Plain_max_dimensions - 1 do
-         tag[d] = sum % Plain_max_dimensions[d]
-         sum = math.floor((sum - tag[d]) / Plain_max_dimensions[d])
+      for d=1,#PLAIN_DIMENSIONS - 1 do
+         tag[d] = sum % PLAIN_DIMENSIONS[d]
+         sum = math.floor((sum - tag[d]) / PLAIN_DIMENSIONS[d])
       end
-      tag[#Plain_max_dimensions] = sum
+      tag[#PLAIN_DIMENSIONS] = sum
       
       --store the newly created vectors in a format the outside can use
       ret_val[s + 1] = vector.toString(tag)
@@ -87,7 +97,8 @@ local function create_tags()
 end
 
 local M = {}
-   M.setup_keys = setup_keys
+   M.setup = setup
    M.create_tags = create_tags
    M.vector_mapping = vector_mapping
+   M.add_mod = add_mod
 return M
