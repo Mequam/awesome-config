@@ -7,7 +7,7 @@ local vector = require "utils.vector"
 local naughty = require "naughty"
 
 
-topic = "default"
+topic = "secondary"
 
 --adds virtual desktop tags that are contain a topic to the given
 --screen
@@ -54,18 +54,25 @@ awesome.connect_signal("plain::walk",function (step_dir)
    end
 end
 )
+--creates a topic and adds its tags to a given screen
+local function create_topic(topic,s)
+   if not s.topics then
+      s.topics = {}
+   end
 
+   s.topics[topic] = {
+      position = {0,0},
+      tags = {}
+   }
+   add_topic_tags(topic,s)
+end
 local function setup(keycarry)
    --initilize the screen positions
    keycarry = plain.setup(keycarry)
    awful.screen.connect_for_each_screen(function(s)
-      s.topics = {
-                  default = {
-                     position = {0,0},
-                     tags = {}
-                  }
-                 }
-      add_topic_tags("default",s)
+      s.topics = {}
+      create_topic("default",s)
+      create_topic("secondary",s)
       s.detatched = false
       step_screen(s,{0,0}) --trick to focus on the first tag on the given screen
    end)
