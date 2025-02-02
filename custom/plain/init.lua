@@ -63,15 +63,26 @@ local function vector_mapping(v)
 end
 --returns a list of tags for our given
 --screen dimensions to be used for additional processing
---TODO: this needs to be generalized to higher dimensions
 local function create_tags()
    local ret_val = {}
-   for i=1,#Plain_max_dimensions do
-      for j=1,Plain_max_dimensions[i] do
-         v = {i-1,j-1}
-         ret_val[vector_mapping(v)] = vector.toString(v)
-      end
+   local point_count = 1
+   for s=1,#Plain_max_dimensions do
+      point_count = point_count * Plain_max_dimensions[s]
    end
+
+   for s=0,point_count - 1 do
+      local sum = s
+      local tag = {}
+      for d=1,#Plain_max_dimensions - 1 do
+         tag[d] = sum % Plain_max_dimensions[d]
+         sum = math.floor((sum - tag[d]) / Plain_max_dimensions[d])
+      end
+      tag[#Plain_max_dimensions] = sum
+      
+      --store the newly created vectors in a format the outside can use
+      ret_val[s + 1] = vector.toString(tag)
+   end
+
    return ret_val
 end
 

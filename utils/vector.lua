@@ -19,7 +19,7 @@ local function modulus(v1,v2)
 end
 
 local function toString(v)
-   ret_val = ""
+   local ret_val = ""
    for k = 1, #v do
       ret_val = ret_val .. v[k] .. ","
    end
