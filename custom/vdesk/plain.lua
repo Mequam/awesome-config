@@ -5,18 +5,6 @@ gears = require "gears"
 PLAIN_DIMENSIONS = {2,2}
 local START_POSITION = {0,0}
 
-
---gives each screen in the system a position indicating where it is currently
---looking, for convinence
-local function create_screen_positions()
-   awful.screen.connect_for_each_screen(
-      function(s)
-         s.desktop_position = START_POSITION
-         print(s.desktop_position)
-      end
-   )
-end
-
 --keybinding used to indicate we want to move
 local move_key = {"Mod1","Control"}
 
@@ -32,9 +20,6 @@ end
 
 --sets up the keys for walking around the plain
 local function setup(keyset)
-   --initilizes the positions on each of the screens
-   create_screen_positions()
-
    --setup movement keys
    return gears.table.join(keyset,
          awful.key(move_key,"Up",function ()

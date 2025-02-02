@@ -7,25 +7,30 @@ local vector = require "utils.vector"
 local naughty = require "naughty"
 
 
+topic = "default"
 
 --adds virtual desktop tags that are contain a topic to the given
 --screen
 local function add_topic_tags(topic,s)
    local tags = plain.create_tags()
    for i=1,#tags do
-      awful.tag.add(topic .. "-" .. tags[i], {
+      local t = awful.tag.add(topic .. "-" .. tags[i], {
                      screen = s,
                      layout = awful.layout.suit.tile
                   })
+      table.insert(s.topics[topic].tags,t)
    end
 end
 function step_screen(screen,step_dir)
-   screen.desktop_position = plain.add_mod(
-                                    screen.desktop_position,
+   screen.topics[topic].position = plain.add_mod(
+                                    screen.topics[topic].position,
                                     step_dir)
+   for k, v in pairs(screen.tags) do
+      print(k,v)
+   end
    --we only move this screen
-   local tag = screen.tags[
-                           plain.vector_mapping(screen.desktop_position)
+   local tag = screen.topics[topic].tags[
+                           plain.vector_mapping(screen.topics[topic].position)
                            ]
    if tag then
       tag:view_only()
@@ -54,6 +59,13 @@ local function setup(keycarry)
    --initilize the screen positions
    keycarry = plain.setup(keycarry)
    awful.screen.connect_for_each_screen(function(s)
+      s.topics = {
+                  default = {
+                     position = {0,0},
+                     tags = {}
+                  }
+                 }
+      add_topic_tags("default",s)
       s.detatched = false
       step_screen(s,{0,0}) --trick to focus on the first tag on the given screen
    end)
@@ -67,5 +79,4 @@ end
 
 M = {}
    M.setup = setup
-   M.add_topic_tags = add_topic_tags
 return M
