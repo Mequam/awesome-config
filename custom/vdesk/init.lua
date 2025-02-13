@@ -4,6 +4,7 @@
 local plain = require "custom.vdesk.plain"
 local awful = require "awful"
 local vector = require "utils.vector"
+local fzf = require "custom.fzf"
 local naughty = require "naughty"
 
 
@@ -81,7 +82,14 @@ local function setup(keycarry)
                      local screen = awful.screen.focused()
                      screen.detached = not screen.detached
                      naughty.notify({ title = "debug", text = "detached",timeout = 0})
-                  end))
+                  end),
+                  awful.key({"Mod1","Control"},"a",function()
+                     fzf({"test","test2","test3"},function (choice)
+                        print(choice)
+                     end)
+                  end)
+                  )
+
 end
 
 M = {}
