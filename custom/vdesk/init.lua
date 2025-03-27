@@ -7,6 +7,7 @@ local vector = require "utils.vector"
 local fzf = require "custom.fzf"
 local naughty = require "naughty"
 local wibox = require "wibox"
+local beautiful = require("beautiful")
 
 
 topic = "secondary"
@@ -18,7 +19,7 @@ local function echo_test()
    if screen then
       print("prompting")
       awful.prompt.run {
-        prompt       = "Run Lua code: ",
+        prompt       = "topic name: ",
         textbox      = screen.text_prompt.widget,
         exe_callback = function(input)
                            print(input)
@@ -114,7 +115,7 @@ local function setup(keycarry)
       local text_prompt = awful.widget.prompt(
          {
             font = "Martian Mono Nerd Font 20",
-            ontop = true
+            bg = beautiful.bg_systray
          }
       )
 
@@ -123,13 +124,20 @@ local function setup(keycarry)
          height = 100,
          visible = true,
          ontop = true,
-         bg = "#222222",
-         fg = "#FFFFFF"
+         bg = beautiful.bg_systray,
+         fg = beautiful.fg_normal,
+         halign = "center",
+         valign = "center"
       })
 
       text_wibox:setup {
-         text_prompt,
-         layout = wibox.layout.flex.horizontal
+         {
+            text_prompt,
+            halign = "center",
+            valign = "center",
+            widget = wibox.container.place
+         },
+         layout = wibox.layout.stack
       }
 
       awful.placement.centered(text_wibox)
