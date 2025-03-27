@@ -3,7 +3,6 @@
 --the way I like
 local plain = require "custom.vdesk.plain"
 local awful = require "awful"
-local vector = require "utils.vector"
 local fzf = require "custom.fzf"
 local naughty = require "naughty"
 local dcp = require "custom.dak_center_prompt"
@@ -70,12 +69,15 @@ end
 --switches to a given topic
 --if you want per screen topic switching this is a good place
 --to do it
-local function switch_to_topic(topic)
+local function switch_to_topic(topic,s)
    -- set each screen to the given topic
-   awful.screen.connect_for_each_screen(function(s)
+      s.last_topic = s.topic
       s.topic = topic
       step_screen(s,{0,0}) --trick to focus on the new topics position
-   end)
+end
+
+local function go_to_last_topic(topic,s)
+   switch_to_topic(s.last_topic,s)
 end
 
 local function setup(keycarry)
@@ -87,6 +89,7 @@ local function setup(keycarry)
       
       s.topics = {}
       s.topic = "default"
+      s.last_topic = "secondary"
       
       create_topic("default",s)
       create_topic("secondary",s)
@@ -112,6 +115,14 @@ local function setup(keycarry)
                            end
                      end)
                   end),
+                  awful.key({"Mod4"},"Tab",function()
+                        awful.screen.connect_for_each_screen(function(s)
+                           go_to_last_topic(choice,s)
+                        end
+                        )
+                     end
+                  )
+                  ,
                   awful.key({"Mod4"},"q",function()
 
                      local screen = awful.screen.focused()
@@ -132,7 +143,10 @@ local function setup(keycarry)
                         end
 
                         fzf(fzf_options,function (choice)
-                           switch_to_topic(choice)
+                           awful.screen.connect_for_each_screen(function(s)
+                              switch_to_topic(choice,s)
+                           end
+                        )
                         end)
                      end
                   end)
