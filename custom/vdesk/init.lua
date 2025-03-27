@@ -6,9 +6,48 @@ local awful = require "awful"
 local vector = require "utils.vector"
 local fzf = require "custom.fzf"
 local naughty = require "naughty"
+local wibox = require "wibox"
 
 
 topic = "secondary"
+
+-- Create a shortcut function
+local function echo_test()
+   local screen = awful.screen.focused()
+   print(screen.text_prompt)
+   if screen then
+      print("prompting")
+      awful.prompt.run {
+        prompt       = "Run Lua code: ",
+        textbox      = screen.text_prompt.widget,
+        exe_callback = function(input)
+                           print(input)
+                        end,
+        history_path = awful.util.get_cache_dir() .. "/history_eval"
+      }
+      --awful.prompt.run {
+      --   prompt = "topic",
+      --   text = "",
+      --   bg_cursor = "#ff0000",
+      --   textbox = screen.mypromptbox,
+      --   exec_callback = function(input)
+      --      print(input)
+      --   end
+      --}
+   end
+    --awful.prompt.run {
+    --    prompt       = '<b>Echo: </b>',
+    --    text         = 'default command',
+    --    bg_cursor    = '#ff0000',
+    --    -- To use the default rc.lua prompt:
+    --    --textbox      = mouse.screen.mypromptbox.widget,
+    --    textbox      = atextbox,
+    --    exe_callback = function(input)
+    --        if not input or #input == 0 then return end
+    --        naughty.notify{ text = 'The input was: '..input }
+    --    end
+    --}
+end
 
 --adds virtual desktop tags that are contain a topic to the given
 --screen
@@ -71,6 +110,58 @@ local function setup(keycarry)
    --initilize the screen positions
    keycarry = plain.setup(keycarry)
    awful.screen.connect_for_each_screen(function(s)
+
+      local text_prompt = awful.widget.prompt(
+         {
+            font = "Martian Mono Nerd Font 20",
+            ontop = true
+         }
+      )
+
+      local text_wibox = wibox({
+         width = 300,
+         height = 100,
+         visible = true,
+         ontop = true,
+         bg = "#222222",
+         fg = "#FFFFFF"
+      })
+
+      text_wibox:setup {
+         text_prompt,
+         layout = wibox.layout.flex.horizontal
+      }
+
+      awful.placement.centered(text_wibox)
+
+      
+
+      --local popup = awful.popup()
+      --popup:add(text_prompt)
+      --popup.screen = s
+      --local text_prompt = awful.popup {
+      --    widget = {
+      --        {
+      --            {
+      --                text   = 'foobar',
+      --                widget = wibox.widget.textbox,
+      --                font = "Martian Mono Nerd Font 20"
+      --            },
+      --            layout = wibox.layout.fixed.vertical,
+      --        },
+      --        margins = 10,
+      --        widget  = wibox.container.margin
+      --    },
+      --    border_width = 0,
+      --    placement    = awful.placement.centered,
+      --    shape        = function (cr,width,height)
+      --                     gears.shape.rectangle(cr,width,height) 
+      --                   end,
+      --    visible      = false,
+      --    screen = s
+      --}
+      
+      s.text_prompt = text_prompt
       s.topics = {}
       create_topic("default",s)
       create_topic("secondary",s)
@@ -84,9 +175,10 @@ local function setup(keycarry)
                      naughty.notify({ title = "debug", text = "detached",timeout = 0})
                   end),
                   awful.key({"Mod1","Control"},"a",function()
-                     fzf({"test","test2","test3"},function (choice)
-                        print(choice)
-                     end)
+                     echo_test()
+                    -- fzf({"test","test2","test3"},function (choice)
+                    --    print(choice)
+                    -- end)
                   end)
                   )
 

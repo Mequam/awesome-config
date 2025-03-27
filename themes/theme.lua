@@ -12,7 +12,7 @@ theme.wallpaper = "/home/j0hn/Pictures/Desktops/jace.jpg"
 -- }}}
 
 -- {{{ Styles
-theme.font      = "sans 8"
+theme.font      = "Source Code VF"
 
 -- {{{ Colors
 theme.fg_normal  = "#DCDCCC"
