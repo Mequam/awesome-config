@@ -9,9 +9,6 @@ local naughty = require "naughty"
 local dcp = require "custom.dak_center_prompt"
 
 
-topic = "secondary"
-
-
 --adds virtual desktop tags that are contain a topic to the given
 --screen
 local function add_topic_tags(topic,s)
@@ -25,16 +22,15 @@ local function add_topic_tags(topic,s)
    end
 end
 
-function step_screen(screen,step_dir)
-   screen.topics[topic].position = plain.add_mod(
-                                    screen.topics[topic].position,
+local function step_screen(screen,step_dir)
+   screen.topics[screen.topic].position = plain.add_mod(
+                                    screen.topics[screen.topic].position,
                                     step_dir)
-   for k, v in pairs(screen.tags) do
-      print(k,v)
-   end
    --we only move this screen
-   local tag = screen.topics[topic].tags[
-                           plain.vector_mapping(screen.topics[topic].position)
+   local tag = screen.topics[screen.topic].tags[
+                           plain.vector_mapping(
+                                 screen.topics[screen.topic].position
+                              )
                            ]
    if tag then
       tag:view_only()
@@ -64,12 +60,26 @@ local function create_topic(topic,s)
       s.topics = {}
    end
 
+   print("creating topic " .. topic)
+
    s.topics[topic] = {
       position = {0,0},
       tags = {}
    }
    add_topic_tags(topic,s)
 end
+
+--switches to a given topic
+--if you want per screen topic switching this is a good place
+--to do it
+local function switch_to_topic(topic)
+   -- set each screen to the given topic
+   awful.screen.connect_for_each_screen(function(s)
+      s.topic = topic
+      step_screen(s,{0,0}) --trick to focus on the new topics position
+   end)
+end
+
 local function setup(keycarry)
    --initilize the screen positions
 
@@ -78,6 +88,7 @@ local function setup(keycarry)
    awful.screen.connect_for_each_screen(function(s)
       
       s.topics = {}
+      s.topic = "default"
       
       create_topic("default",s)
       create_topic("secondary",s)
@@ -87,21 +98,49 @@ local function setup(keycarry)
    end)
    return gears.table.join(keycarry,
                   awful.key({"Mod1","Control"},"d",function()
+                     
                      local screen = awful.screen.focused()
                      screen.detached = not screen.detached
                      naughty.notify({ title = "debug", text = "detached",timeout = 0})
+
                   end),
                   awful.key({"Mod1","Control"},"a",function()
                      dcp.prompt("",
-                     function (info)
-                        print(info)
+                        function (topic_name)
+                           if topic_name ~= "" then
+                              awful.screen.connect_for_each_screen(function (s2)
+                                 create_topic(topic_name,s2)
+                              end)
+                           end
                      end)
-                    -- fzf({"test","test2","test3"},function (choice)
-                    --    print(choice)
-                    -- end)
+                  end),
+                  awful.key({"Mod4"},"q",function()
+
+                     local screen = awful.screen.focused()
+                     
+                     print(screen.topics)
+
+                     -- the rest of the code expects topics to be global,
+                     -- but they are stored per-screen, so in the future
+                     -- if you wanted to do some kind of per screen topic
+                     -- manipulation that capability is supported
+                     
+
+                     if screen then
+
+                        local fzf_options = {}
+                        local n = 0
+                        for k , _ in pairs(screen.topics) do
+                           n = n + 1
+                           fzf_options[n] = k
+                        end
+
+                        fzf(fzf_options,function (choice)
+                           switch_to_topic(choice)
+                        end)
+                     end
                   end)
                   )
-
 end
 
 M = {}
