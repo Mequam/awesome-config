@@ -60,8 +60,6 @@ local function create_topic(topic,s)
       s.topics = {}
    end
 
-   print("creating topic " .. topic)
-
    s.topics[topic] = {
       position = {0,0},
       tags = {}
@@ -118,8 +116,6 @@ local function setup(keycarry)
 
                      local screen = awful.screen.focused()
                      
-                     print(screen.topics)
-
                      -- the rest of the code expects topics to be global,
                      -- but they are stored per-screen, so in the future
                      -- if you wanted to do some kind of per screen topic

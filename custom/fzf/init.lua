@@ -21,7 +21,6 @@ local function fuzzy_find_topics(options,callback)
       option_string = option_string .. options[1]
    end
 
-   print(option_string)
 
    fzf_pid = awful.spawn.easy_async(string.format(
                                        "terminator -e '~/.config/awesome/scripts/fzf_options.sh %s'",
@@ -35,9 +34,7 @@ local function fuzzy_find_topics(options,callback)
 end
 
 client.connect_signal("manage",function (c)
-   print(c.pid)
    if fzf_pid ~= 0 and c.pid == fzf_pid then
-      print("fullscreen!")
       c.fullscreen = true
       fzf_pid = 0
    end
