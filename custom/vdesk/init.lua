@@ -75,15 +75,21 @@ local function step_screen_d(screen,step_dir)
    return step_screen(screen,{0,0})
 end
 
+-- returns true if the given tag name matches the
+-- given topic
+local function is_topic_tag(tag_name,topic)
+   return tag_name:match('^' .. topic .. '-.*')
+end
+
 --takes a client and removes tags matching the topic of the current screen
 --returns the new tags of the client for convinent usage
-local function remove_topic_tags(screen,c)
+local function remove_topic_tags(topic,c)
    local tags = c:tags()
    local new_tags = {}
 
    -- remove the old tags from the client
    for k,tag in ipairs(tags) do
-      if not (tag.name:match('^' .. screen.topic .. '-.*')) then
+      if not (is_topic_tag(tag.name,topic)) then
          table.insert(new_tags,tag)
       end
    end
@@ -93,11 +99,55 @@ local function remove_topic_tags(screen,c)
    return new_tags
 end
 
+-- convinence function to peel off the position
+-- from one of our tags
+local function get_tag_position(tag_name)
+   local dash_index = string.find(tag_name,"-")
+   return string.sub(tag_name,dash_index+1)
+end
+
+local function get_tag_topic(tag_name)
+   local dash_index = string.find(tag_name,"-")
+   return string.sub(tag_name,0,dash_index-1)
+end
+
+-- attempts to get the first tag from the client that
+-- matches the given topic
+local function get_client_topic_tag(topic,client)
+   for _,tag in ipairs(client:tags()) do
+      if is_topic_tag(tag.name,topic) then
+         return tag
+      end
+   end
+end
+
+-- moves a client to the given topic
+local function move_client_to_topic(to_topic,client)
+   local start_screen = awful.screen.focused()
+   if not start_screen then return end
+
+   -- remove the old tags
+   local new_tags = remove_topic_tags(start_screen.topic,client)
+
+   -- add a tag in the new topic with the given position
+   local new_tag = start_screen.topics[to_topic].tags[
+      plain.vector_mapping(
+         start_screen.topics[start_screen.topic].position
+      )
+   ]
+   table.insert(new_tags,new_tag)
+
+   -- update the client tags to aim at the new topic
+   client:tags(new_tags)
+
+
+end
+
 -- steps to the next screen,but takes the focused window with it
 local function step_screen_with_window(screen,step_dir)
    c = client.focus
    if c then
-      local new_tags = remove_topic_tags(screen,c)
+      local new_tags = remove_topic_tags(screen.topic,c)
       local current_desktop_tag = step_screen(screen,step_dir)
 
       table.insert(new_tags,current_desktop_tag)
@@ -111,7 +161,7 @@ end
 local function step_screen_with_window_d(screen,step_dir)
    c = client.focus
    if c then
-      local new_tags = remove_topic_tags(screen,c)
+      local new_tags = remove_topic_tags(screen.topic,c)
       local current_desktop_tag = step_screen_d(screen,step_dir)
 
       table.insert(new_tags,current_desktop_tag)
@@ -251,6 +301,14 @@ local function setup(keycarry)
                   --actually I think all of the above vectors are mathmatically
                   --equivilent in the modulus space we move in, but it pays to have
                   --consistency :D
+                  
+                  awful.key({"Control","Mod1"},"b",function ()
+                     if client.focus then
+                        print("focused client!")
+                        move_client_to_topic("secondary",client.focus)
+                     end
+                  end
+                  ),
 
                   awful.key({"Mod4"},"q",function()
 
