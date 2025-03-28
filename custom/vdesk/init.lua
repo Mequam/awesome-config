@@ -32,6 +32,18 @@ function detachify(callback,screen,arg)
    end
 end
 
+-- gets a list of topics for a given screen
+function get_topic_options(screen)
+   local fzf_options = {}
+   local n = 0
+   for k , _ in pairs(screen.topics) do
+      n = n + 1
+      fzf_options[n] = k
+   end
+
+   return fzf_options
+end
+
 --adds virtual desktop tags that are contain a topic to the given
 --screen
 local function add_topic_tags(topic,s)
@@ -132,7 +144,7 @@ local function move_client_to_topic(to_topic,client)
    -- add a tag in the new topic with the given position
    local new_tag = start_screen.topics[to_topic].tags[
       plain.vector_mapping(
-         start_screen.topics[start_screen.topic].position
+         start_screen.topics[to_topic].position
       )
    ]
    table.insert(new_tags,new_tag)
@@ -302,10 +314,15 @@ local function setup(keycarry)
                   --equivilent in the modulus space we move in, but it pays to have
                   --consistency :D
                   
-                  awful.key({"Control","Mod1"},"b",function ()
-                     if client.focus then
-                        print("focused client!")
-                        move_client_to_topic("secondary",client.focus)
+                  awful.key({"Mod4","Control"},"q",function ()
+                     local client_to_move = client.focus
+                     local screen = awful.screen.focused()
+                     if client_to_move and screen then
+                        local fzf_options = get_topic_options(screen)
+                        fzf(fzf_options,function (choice)
+                           move_client_to_topic(choice,client_to_move)
+                           switch_to_topic_d(screen,choice)
+                        end)
                      end
                   end
                   ),
@@ -313,24 +330,12 @@ local function setup(keycarry)
                   awful.key({"Mod4"},"q",function()
 
                      local screen = awful.screen.focused()
-                     
-                     -- the rest of the code expects topics to be global,
-                     -- but they are stored per-screen, so in the future
-                     -- if you wanted to do some kind of per screen topic
-                     -- manipulation that capability is supported
-                     
 
                      if screen then
 
-                        local fzf_options = {}
-                        local n = 0
-                        for k , _ in pairs(screen.topics) do
-                           n = n + 1
-                           fzf_options[n] = k
-                        end
-
+                        local fzf_options = get_topic_options(screen)
                         fzf(fzf_options,function (choice)
-                              switch_to_topic_d(awful.screen.focused(),choice)
+                              switch_to_topic_d(screen,choice)
                         end)
                      end
                   end)
