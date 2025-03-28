@@ -335,7 +335,7 @@ local function setup(keycarry)
 
                         local fzf_options = get_topic_options(screen)
                         fzf(fzf_options,function (choice)
-                              switch_to_topic_d(screen,choice)
+                              switch_to_topic_d(awful.screen.focused(),choice)
                         end)
                      end
                   end)
