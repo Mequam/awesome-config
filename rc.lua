@@ -10,6 +10,7 @@ require("awful.autofocus")
 local wibox = require("wibox")
 -- Theme handling library
 local beautiful = require("beautiful")
+local dpi = require("beautiful.xresources").apply_dpi
 -- Notification library
 local naughty = require("naughty")
 local menubar = require("menubar")
@@ -239,6 +240,8 @@ root.buttons(gears.table.join(
     awful.button({ }, 5, awful.tag.viewprev)
 ))
 -- }}}
+local spaced_useless_gap = true
+
 
 -- {{{ Key bindings
 globalkeys = gears.table.join(
@@ -273,6 +276,41 @@ globalkeys = gears.table.join(
               {description = "swap with previous client by index", group = "client"}),
     awful.key({"Control", "Shift"}, "Left", function () awful.screen.focus_relative( 1) end,
               {description = "focus the next screen", group = "screen"}),
+    awful.key({"Mod4","Shift"}, "g", function ()  
+       if spaced_useless_gap then
+         beautiful.useless_gap = dpi(0)
+       else
+         beautiful.useless_gap = dpi(10)
+       end
+       
+       -- super hacky way to get the screen to reload
+
+       awful.screen.connect_for_each_screen(function(s)
+          awful.layout.inc(-1)
+          awful.layout.inc(1)
+       end
+       )
+
+       spaced_useless_gap = not spaced_useless_gap
+    end),
+
+    awful.key({"Mod4"}, "g", function ()  
+       if spaced_useless_gap then
+         beautiful.useless_gap = dpi(0)
+       else
+         beautiful.useless_gap = dpi(3)
+       end
+       
+       -- super hacky way to get the screen to reload
+       awful.screen.connect_for_each_screen(function(s)
+          awful.layout.inc(-1)
+          awful.layout.inc(1)
+       end
+       )
+
+       spaced_useless_gap = not spaced_useless_gap
+    end),
+
     awful.key({"Control", "Shift"}, "Right", function () awful.screen.focus_relative(-1) end,
               {description = "focus the previous screen", group = "screen"}),
     awful.key({ modkey,           }, "u", awful.client.urgent.jumpto,
