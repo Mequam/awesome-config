@@ -344,4 +344,5 @@ end
 
 M = {}
    M.setup = setup
+   M.is_topic_tag = is_topic_tag
 return M

@@ -68,22 +68,22 @@ modkey = "Mod4"
 
 -- Table of layouts to cover with awful.layout.inc, order matters.
 awful.layout.layouts = {
-    awful.layout.suit.floating,
-    awful.layout.suit.tile,
-    awful.layout.suit.tile.left,
-    awful.layout.suit.tile.bottom,
-    awful.layout.suit.tile.top,
-    awful.layout.suit.fair,
-    awful.layout.suit.fair.horizontal,
     awful.layout.suit.spiral,
-    awful.layout.suit.spiral.dwindle,
-    awful.layout.suit.max,
-    awful.layout.suit.max.fullscreen,
     awful.layout.suit.magnifier,
-    awful.layout.suit.corner.nw,
-    awful.layout.suit.corner.ne,
-    awful.layout.suit.corner.sw,
-    awful.layout.suit.corner.se,
+    awful.layout.suit.fair,
+    awful.layout.suit.corner.nw
+    --awful.layout.suit.tile,
+    --awful.layout.suit.tile.left,
+    --awful.layout.suit.tile.bottom,
+    --awful.layout.suit.tile.top,
+    --awful.layout.suit.fair.horizontal,
+    --awful.layout.suit.spiral.dwindle,
+    --awful.layout.suit.max,
+    ----awful.layout.suit.max.fullscreen,
+    --awful.layout.suit.floating,
+    --awful.layout.suit.corner.ne,
+    --awful.layout.suit.corner.sw,
+    --awful.layout.suit.corner.se,
 }
 -- }}}
 
@@ -114,7 +114,7 @@ mykeyboardlayout = awful.widget.keyboardlayout()
 
 -- {{{ Wibar
 -- Create a textclock widget
-mytextclock = wibox.widget.textclock()
+mytextclocRight = wibox.widget.textclock()
 
 -- Create a wibox for each screen and add it
 local taglist_buttons = gears.table.join(
@@ -175,7 +175,6 @@ awful.screen.connect_for_each_screen(function(s)
     -- Wallpaper
     set_wallpaper(s)
 
-
     -- Each screen has its own tag table.
     --awful.tag({ "1", "2", "3", "4", "5", "6", "7", "8", "9" }, s, awful.layout.layouts[1])
 
@@ -192,7 +191,12 @@ awful.screen.connect_for_each_screen(function(s)
     -- Create a taglist widget
     s.mytaglist = awful.widget.taglist {
         screen  = s,
-        filter  = awful.widget.taglist.filter.all,
+        filter  = function (tag)
+           local current_screen = awful.screen.focused()
+           if current_screen then
+               return vdesk.is_topic_tag(tag.name,current_screen.topic) or not vdesk.is_topic_tag(tag.name,".*")
+           end
+        end,
         buttons = taglist_buttons
     }
 
@@ -247,13 +251,13 @@ globalkeys = gears.table.join(
     awful.key({ modkey,           }, "Escape", awful.tag.history.restore,
               {description = "go back", group = "tag"}),
 
-    awful.key({ modkey,           }, "j",
+    awful.key({ "Mod1",           }, "Left",
         function ()
             awful.client.focus.byidx( 1)
         end,
         {description = "focus next by index", group = "client"}
     ),
-    awful.key({ modkey,           }, "k",
+    awful.key({ "Mod1",           }, "Right",
         function ()
             awful.client.focus.byidx(-1)
         end,
@@ -263,13 +267,13 @@ globalkeys = gears.table.join(
               {description = "show main menu", group = "awesome"}),
 
     -- Layout manipulation
-    awful.key({ modkey, "Shift"   }, "j", function () awful.client.swap.byidx(  1)    end,
+    awful.key({ "Mod1", "Mod4"   }, "Left", function () awful.client.swap.byidx(  1)    end,
               {description = "swap with next client by index", group = "client"}),
-    awful.key({ modkey, "Shift"   }, "k", function () awful.client.swap.byidx( -1)    end,
+    awful.key({ "Mod1", "Mod4"   }, "Right", function () awful.client.swap.byidx( -1)    end,
               {description = "swap with previous client by index", group = "client"}),
-    awful.key({ modkey, "Control" }, "j", function () awful.screen.focus_relative( 1) end,
+    awful.key({"Control", "Shift"}, "Left", function () awful.screen.focus_relative( 1) end,
               {description = "focus the next screen", group = "screen"}),
-    awful.key({ modkey, "Control" }, "k", function () awful.screen.focus_relative(-1) end,
+    awful.key({"Control", "Shift"}, "Right", function () awful.screen.focus_relative(-1) end,
               {description = "focus the previous screen", group = "screen"}),
     awful.key({ modkey,           }, "u", awful.client.urgent.jumpto,
               {description = "jump to urgent client", group = "client"}),
@@ -594,3 +598,18 @@ end)
 client.connect_signal("focus", function(c) c.border_color = beautiful.border_focus end)
 client.connect_signal("unfocus", function(c) c.border_color = beautiful.border_normal end)
 -- }}}
+
+
+-- TODO: get the layout defaulting to custom values
+-- awful.screen.connect_for_each_screen(function(s)
+-- 
+-- 
+--       naughty.notify({ title = "debug", 
+--                        text = "setting layout!",
+--                        timeout = 0})
+--       awful.layout.set(awful.layout.suit.magnifier,s)
+--    naughty.notify({ title = "debug", 
+--                     text = tostring(s.index),
+--                     timeout = 0})
+-- end
+--)
