@@ -7,6 +7,15 @@ local fzf = require "custom.fzf"
 local naughty = require "naughty"
 local dcp = require "custom.dak_center_prompt"
 
+-- global variables that represent the current master topic and point
+-- screens can vary from this, and the math of the program is done per-screen,
+-- however these serve as bookmarks for screens to bounce back to when
+-- we reattach them to follow the rest of the system
+
+dak_global_topic = "default"
+dak_global_last_topic = "secondary"
+dak_global_point = {0,0}
+
 -- higher order convinence function that encodes the logic
 -- of doing something for detached screens or not at all
 function detachify(callback,screen,arg)
@@ -46,6 +55,12 @@ local function step_screen(screen,step_dir)
                                  screen.topics[screen.topic].position
                               )
                            ]
+   
+   -- store the global topic as well
+   if not screen.detached then
+      dak_global_point = screen.topics[screen.topic].position
+   end
+
    if tag then
       tag:view_only()
       return tag
@@ -129,15 +144,54 @@ end
 --switches to a given topic
 --if you want per screen topic switching this is a good place
 --to do it
-local function switch_to_topic(topic,s)
+local function switch_to_topic(s,topic)
    -- set each screen to the given topic
       s.last_topic = s.topic
       s.topic = topic
+
+   -- store the global topic if this screen is part of the global
+   -- topic space
+      if not s.detached then
+         dak_global_topic = topic
+         dak_global_last_topic = s.last_topic
+      end
+
       step_screen(s,{0,0}) --trick to focus on the new topics position
 end
 
-local function go_to_last_topic(topic,s)
-   switch_to_topic(s.last_topic,s)
+local function switch_to_topic_d(s,topic)
+   detachify(switch_to_topic,s,topic)
+end
+
+local function go_to_last_topic(s)
+   switch_to_topic(s,s.last_topic)
+end
+
+local function go_to_last_topic_d(s)
+   detachify(go_to_last_topic,s,s.last_topic)
+end
+
+--detaches the current screen from our changing controls
+local function detach(screen)
+
+   screen.detached = not screen.detached
+   local message = "detached current screen"
+
+   if not screen.detached then
+      message = "reatached current screen"
+   end
+
+   naughty.notify({ title = "dak topics", 
+                    text = message,
+                    timeout = 5})
+
+   if not screen.detached then
+      screen.topic = dak_global_topic
+      screen.last_topic = dak_global_last_topic
+      screen.topics[dak_global_topic].position = dak_global_point
+      step_screen(screen,{0,0})
+   end
+
 end
 
 local function setup(keycarry)
@@ -159,13 +213,7 @@ local function setup(keycarry)
    end)
    return gears.table.join(keycarry,
                   awful.key({"Mod1","Control"},"d",function()
-                     
-                     local screen = awful.screen.focused()
-                     screen.detached = not screen.detached
-                     naughty.notify({ title = "dak topics", 
-                                      text = "detached current screen",
-                                      timeout = 0})
-
+                     detach(awful.screen.focused())
                   end),
                   awful.key({"Mod1","Control"},"a",function()
                      dcp.prompt("",
@@ -173,18 +221,16 @@ local function setup(keycarry)
                            if topic_name ~= "" then
                               awful.screen.connect_for_each_screen(function (s2)
                                  create_topic(topic_name,s2)
-                                 --if you just made the topic you probably
-                                 --want to switch to it
-                                 switch_to_topic(topic_name,s2)
                               end)
+
+                              --if you just made the topic you probably
+                              --want to switch to it
+                              switch_to_topic_d(awful.screen.focused(),topic_name)
                            end
                      end)
                   end),
                   awful.key({"Mod4"},"Tab",function()
-                        awful.screen.connect_for_each_screen(function(s)
-                           go_to_last_topic(choice,s)
-                        end
-                        )
+                           go_to_last_topic_d(awful.screen.focused(),choice)
                      end
                   ),
                   --move a window with you over virtual desktops
@@ -226,10 +272,7 @@ local function setup(keycarry)
                         end
 
                         fzf(fzf_options,function (choice)
-                           awful.screen.connect_for_each_screen(function(s)
-                              switch_to_topic(choice,s)
-                           end
-                        )
+                              switch_to_topic_d(awful.screen.focused(),choice)
                         end)
                      end
                   end)
