@@ -7,6 +7,21 @@ local fzf = require "custom.fzf"
 local naughty = require "naughty"
 local dcp = require "custom.dak_center_prompt"
 
+-- higher order convinence function that encodes the logic
+-- of doing something for detached screens or not at all
+function detachify(callback,screen,arg)
+   if screen.detached then
+      callback(screen,arg)
+   else
+      --we try and move EVERY screen
+      --that is not detatched
+      awful.screen.connect_for_each_screen(function(s)
+            if not s.detached then
+               callback(s,arg)
+            end
+      end)
+   end
+end
 
 --adds virtual desktop tags that are contain a topic to the given
 --screen
@@ -37,45 +52,65 @@ local function step_screen(screen,step_dir)
    end
 end
 
+-- convinence function that steps screen and respects
+-- the detach operator
+local function step_screen_d(screen,step_dir)
+   detachify(step_screen,screen,step_dir)
+   -- get the current tag of the screen for return value
+   return step_screen(screen,{0,0})
+end
+
+--takes a client and removes tags matching the topic of the current screen
+--returns the new tags of the client for convinent usage
+local function remove_topic_tags(screen,c)
+   local tags = c:tags()
+   local new_tags = {}
+
+   -- remove the old tags from the client
+   for k,tag in ipairs(tags) do
+      if not (tag.name:match('^' .. screen.topic .. '-.*')) then
+         table.insert(new_tags,tag)
+      end
+   end
+
+   c:tags(new_tags)
+   
+   return new_tags
+end
+
 -- steps to the next screen,but takes the focused window with it
 local function step_screen_with_window(screen,step_dir)
    c = client.focus
    if c then
-      local tags = c:tags()
-      local new_tags = {}
-
-      -- remove the old tags from the client
-      for k,tag in ipairs(tags) do
-         if not (tag.name:match('^' .. screen.topic .. '-.*')) then
-            table.insert(new_tags,tag)
-         end
-      end
-
-      -- actually move to the next screen
+      local new_tags = remove_topic_tags(screen,c)
       local current_desktop_tag = step_screen(screen,step_dir)
 
       table.insert(new_tags,current_desktop_tag)
 
-      --update the tags qwith the new value
+      --update the tags to include the new ones
       c:tags(new_tags)
    end
 end
 
+-- steps to the next screen, with focused window, and pulls other screens
+local function step_screen_with_window_d(screen,step_dir)
+   c = client.focus
+   if c then
+      local new_tags = remove_topic_tags(screen,c)
+      local current_desktop_tag = step_screen_d(screen,step_dir)
+
+      table.insert(new_tags,current_desktop_tag)
+
+      --update the tags to include the new ones
+      c:tags(new_tags)
+   end
+end
+
+
 --called when the user wants to walk along the current
 --desktop plain
 awesome.connect_signal("plain::walk",function (step_dir)
-   local screen = awful.screen.focused()
-   if screen.detached then
-      step_screen(screen,step_dir)
-   else
-      --we try and move EVERY screen
-      --that is not detatched
-      awful.screen.connect_for_each_screen(function(s)
-            if not s.detached then
-               step_screen(s,step_dir)
-            end
-      end)
-   end
+   detachify(step_screen,awful.screen.focused(),step_dir)
 end
 )
 --creates a topic and adds its tags to a given screen
@@ -150,16 +185,16 @@ local function setup(keycarry)
                   --move a window with you over virtual desktops
                   --gotta really GRAB the window to move it
                   awful.key({"Mod4","Mod1","Shift","Control"},"Left", function ()
-                     step_screen_with_window(awful.screen.focused(),{-1,0})
+                     step_screen_with_window_d(awful.screen.focused(),{-1,0})
                   end),
                   awful.key({"Mod4","Mod1","Shift","Control"},"Right", function ()
-                     step_screen_with_window(awful.screen.focused(),{1,0})
+                     step_screen_with_window_d(awful.screen.focused(),{1,0})
                   end),
                   awful.key({"Mod4","Mod1","Shift","Control"},"Down", function ()
-                     step_screen_with_window(awful.screen.focused(),{0,-1})
+                     step_screen_with_window_d(awful.screen.focused(),{0,-1})
                   end),
                   awful.key({"Mod4","Mod1","Shift","Control"},"Up", function ()
-                     step_screen_with_window(awful.screen.focused(),{0,1})
+                     step_screen_with_window_d(awful.screen.focused(),{0,1})
                   end),
 
                   --actually I think all of the above vectors are mathmatically
