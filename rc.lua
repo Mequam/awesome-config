@@ -273,7 +273,7 @@ globalkeys = gears.table.join(
               {description = "focus the previous screen", group = "screen"}),
     awful.key({ modkey,           }, "u", awful.client.urgent.jumpto,
               {description = "jump to urgent client", group = "client"}),
-    awful.key({ modkey,           }, "Tab",
+    awful.key({ modkey,           }, "Enter",
         function ()
             awful.client.focus.history.previous()
             if client.focus then
@@ -337,7 +337,23 @@ globalkeys = gears.table.join(
               {description = "lua execute prompt", group = "awesome"}),
     -- Menubar
     awful.key({ modkey }, "p", function() menubar.show() end,
-              {description = "show the menubar", group = "launcher"})
+              {description = "show the menubar", group = "launcher"}),
+    
+    -- cycle through screens, if we get multiple screens we can use a more complex solution
+    -- but this works for the time bieng
+    awful.key({"Mod4","Control"},"Left",function()
+                                       if client.focus then
+                                          client.focus:move_to_screen()
+                                      end
+                                    end
+             ),
+
+    awful.key({"Mod4","Control"},"Right",function()
+                                      if client.focus then
+                                          client.focus:move_to_screen()
+                                      end
+                                    end
+             )
 )
 --enable the virtual desktop key setup
 globalkeys = vdesk.setup(globalkeys)
