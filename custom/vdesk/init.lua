@@ -162,7 +162,9 @@ local function setup(keycarry)
                      
                      local screen = awful.screen.focused()
                      screen.detached = not screen.detached
-                     naughty.notify({ title = "debug", text = "detached",timeout = 0})
+                     naughty.notify({ title = "dak topics", 
+                                      text = "detached current screen",
+                                      timeout = 0})
 
                   end),
                   awful.key({"Mod1","Control"},"a",function()
@@ -171,6 +173,9 @@ local function setup(keycarry)
                            if topic_name ~= "" then
                               awful.screen.connect_for_each_screen(function (s2)
                                  create_topic(topic_name,s2)
+                                 --if you just made the topic you probably
+                                 --want to switch to it
+                                 switch_to_topic(topic_name,s2)
                               end)
                            end
                      end)
