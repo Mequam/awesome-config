@@ -33,7 +33,8 @@ local function setup(keyset)
          end),
          awful.key(move_key,"Right",function ()
             awesome.emit_signal("plain::walk",{1,0})
-         end)
+         end),
+         awful.key({"Mod1","Mod4","Shift","Control"})
    )
 end
 --takes in a vector and returns an

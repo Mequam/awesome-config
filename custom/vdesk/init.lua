@@ -33,6 +33,31 @@ local function step_screen(screen,step_dir)
                            ]
    if tag then
       tag:view_only()
+      return tag
+   end
+end
+
+-- steps to the next screen,but takes the focused window with it
+local function step_screen_with_window(screen,step_dir)
+   c = client.focus
+   if c then
+      local tags = c:tags()
+      local new_tags = {}
+
+      -- remove the old tags from the client
+      for k,tag in ipairs(tags) do
+         if not (tag.name:match('^' .. screen.topic .. '-.*')) then
+            table.insert(new_tags,tag)
+         end
+      end
+
+      -- actually move to the next screen
+      local current_desktop_tag = step_screen(screen,step_dir)
+
+      table.insert(new_tags,current_desktop_tag)
+
+      --update the tags qwith the new value
+      c:tags(new_tags)
    end
 end
 
@@ -121,8 +146,26 @@ local function setup(keycarry)
                         end
                         )
                      end
-                  )
-                  ,
+                  ),
+                  --move a window with you over virtual desktops
+                  --gotta really GRAB the window to move it
+                  awful.key({"Mod4","Mod1","Shift","Control"},"Left", function ()
+                     step_screen_with_window(awful.screen.focused(),{-1,0})
+                  end),
+                  awful.key({"Mod4","Mod1","Shift","Control"},"Right", function ()
+                     step_screen_with_window(awful.screen.focused(),{1,0})
+                  end),
+                  awful.key({"Mod4","Mod1","Shift","Control"},"Down", function ()
+                     step_screen_with_window(awful.screen.focused(),{0,-1})
+                  end),
+                  awful.key({"Mod4","Mod1","Shift","Control"},"Up", function ()
+                     step_screen_with_window(awful.screen.focused(),{0,1})
+                  end),
+
+                  --actually I think all of the above vectors are mathmatically
+                  --equivilent in the modulus space we move in, but it pays to have
+                  --consistency :D
+
                   awful.key({"Mod4"},"q",function()
 
                      local screen = awful.screen.focused()
