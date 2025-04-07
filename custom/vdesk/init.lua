@@ -100,7 +100,7 @@ local function remove_topic_tags(topic,c)
    local new_tags = {}
 
    -- remove the old tags from the client
-   for k,tag in ipairs(tags) do
+   for _,tag in ipairs(tags) do
       if not (is_topic_tag(tag.name,topic)) then
          table.insert(new_tags,tag)
       end
@@ -201,6 +201,26 @@ local function create_topic(topic,s)
       tags = {}
    }
    add_topic_tags(topic,s)
+end
+-- returns true if the given topic contains the given client
+local function is_topic_contains_client(topic,client)
+      for _,tag in ipairs(client:tags()) do
+         if (is_topic_tag(tag.name,topic)) then
+            -- close the windows on the given topic
+            return true
+         end
+      end
+      return false
+end
+-- close all clients that are in the given topic
+local function close_all_clients_in_topic(topic)
+   -- get a list of all clients
+   print("closing all topics of " .. topic)
+   for _, c in ipairs(client.get()) do
+      if is_topic_contains_client(topic,c) then
+         c:kill()
+      end
+   end
 end
 
 --switches to a given topic
@@ -327,6 +347,12 @@ local function setup(keycarry)
                   end
                   ),
 
+                  awful.key({"Mod1","Control"},"x",function ()
+                     print("attempting to close all windows")
+                     close_all_clients_in_topic(awful.screen.focused().topic)
+                  end
+                  ),
+
                   awful.key({"Mod4"},"q",function()
 
                      local screen = awful.screen.focused()
@@ -344,5 +370,5 @@ end
 
 M = {}
    M.setup = setup
-   M.is_topic_tag = is_topic_tag
+   M.is_topic_tag= is_topic_tag
 return M
