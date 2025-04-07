@@ -58,7 +58,7 @@ beautiful.init("/home/j0hn/.config/awesome/themes/theme.lua")
 terminal = "terminator"
 editor = "nvim"
 editor_cmd = terminal .. " -e " .. "'" .. editor
-webbrowser = "chromium"
+webbrowser = "zen-browser"
 
 -- Default modkey.
 -- Usually, Mod4 is the key with a logo between Control and Alt.
@@ -407,7 +407,7 @@ clientkeys = gears.table.join(
             c:raise()
         end,
         {description = "toggle fullscreen", group = "client"}),
-    awful.key({ "Mod1", "Shift"   }, "w",      function (c) c:kill()                         end,
+    awful.key({ "Control", "Shift"   }, "w",      function (c) c:kill()                         end,
               {description = "close", group = "client"}),
     awful.key({ modkey, "Control" }, "space",  awful.client.floating.toggle                     ,
               {description = "toggle floating", group = "client"}),
@@ -635,19 +635,3 @@ end)
 
 client.connect_signal("focus", function(c) c.border_color = beautiful.border_focus end)
 client.connect_signal("unfocus", function(c) c.border_color = beautiful.border_normal end)
--- }}}
-
-
--- TODO: get the layout defaulting to custom values
--- awful.screen.connect_for_each_screen(function(s)
--- 
--- 
---       naughty.notify({ title = "debug", 
---                        text = "setting layout!",
---                        timeout = 0})
---       awful.layout.set(awful.layout.suit.magnifier,s)
---    naughty.notify({ title = "debug", 
---                     text = tostring(s.index),
---                     timeout = 0})
--- end
---)
