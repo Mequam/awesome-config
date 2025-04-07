@@ -215,13 +215,28 @@ end
 -- close all clients that are in the given topic
 local function close_all_clients_in_topic(topic)
    -- get a list of all clients
-   print("closing all topics of " .. topic)
    for _, c in ipairs(client.get()) do
       if is_topic_contains_client(topic,c) then
          c:kill()
       end
    end
 end
+
+-- removes the given topic from the given screen
+local function remove_topic(s,topic)
+   if not s.topics then return end
+
+   -- remove windows on the current screen that are on the given topic
+   for _, c in ipairs(s.clients) do
+      if is_topic_contains_client(topic,c) then
+         c:kill()
+      end
+   end
+
+   -- remove the given topic
+   s.topics[topic] = nil
+end
+
 
 --switches to a given topic
 --if you want per screen topic switching this is a good place
@@ -276,6 +291,37 @@ local function detach(screen)
 
 end
 
+-- removes the given topic accross all screens
+-- also closes all programs that are in removed topics
+-- and moves screens to a valid topic after removing
+-- the given topic
+local function remove_topic_on_all_screens(topic)
+   -- built in topics cannot be removed,
+   -- if you disagree change that here :)
+   if topic == 'default' or topic == 'secondary' then return end
+
+   awful.screen.connect_for_each_screen(function(s)
+      remove_topic(s,topic)
+
+      -- move everybody to a new topic after the fact,
+      -- except the detached screens UNLESS they are 
+      -- losing the topic they are currently on
+      if not s.detached or s.topic == topic then
+         switch_to_topic(s,'default')
+         
+         -- make sure that the previous topic
+         -- is still maintained when were down a topic
+         if s.last_topic == topic then
+            s.last_topic = 'secondary'
+         end
+
+         -- if were not detached go to secondary back
+         dak_global_last_topic = 'secondary'
+      end
+
+
+   end)
+end
 local function setup(keycarry)
    --initilize the screen positions
 
@@ -348,8 +394,13 @@ local function setup(keycarry)
                   ),
 
                   awful.key({"Mod1","Control"},"x",function ()
-                     print("attempting to close all windows")
                      close_all_clients_in_topic(awful.screen.focused().topic)
+                  end
+                  ),
+
+                  -- remove the given topic
+                  awful.key({"Mod1","Control"},"r",function ()
+                     remove_topic_on_all_screens(awful.screen.focused().topic)
                   end
                   ),
 
