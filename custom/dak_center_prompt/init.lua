@@ -1,5 +1,6 @@
 local beautiful = require("beautiful")
 local wibox = require "wibox"
+local gears = require "gears"
 
 -- Create a shortcut function to hide and unhide prompt
 local function dak_center_prompt(prompt,callback)
@@ -20,9 +21,16 @@ local function dak_center_prompt(prompt,callback)
 
 end
 
+local has_ran_setup_for_dak_prompt = false
+
 -- called to setup the prompt
-local function setup()
-   awful.screen.connect_for_each_screen(function(s)
+-- for a given screen
+local function setup(s2)
+   --make sure we run this as a singleton
+   if has_ran_setup_for_dak_prompt then return end
+   has_ran_setup_for_dak_prompt = true
+
+   awful.screen.connect_for_each_screen(function (s)
       local text_prompt = awful.widget.prompt(
          {
             font = "Martian Mono Nerd Font 20",
@@ -51,14 +59,25 @@ local function setup()
          layout = wibox.layout.stack
       }
 
-      awful.placement.centered(text_wibox)
+      data = {
+         x=s.geometry.x,
+         y=s.geometry.y,
+         width=s.geometry.width,
+         height=s.geometry.height
+      }
+
+      text_wibox.x = s.workarea.x + (s.workarea.width - text_wibox.width) / 2
+      text_wibox.y = s.workarea.y + (s.workarea.height - text_wibox.height) / 2
+
+      --awful.placement.centered(text_wibox, {
+      --   parent = data --make sure its per screen
+      --})
 
       s.dak_center_prompt = text_prompt
       s.dak_center_prompt_container = text_wibox
 
       return keycarry
-   end
-   )
+   end) --foreach screen
 end
 
 

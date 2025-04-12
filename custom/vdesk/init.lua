@@ -322,10 +322,11 @@ local function remove_topic_on_all_screens(topic)
 
    end)
 end
+
+
 local function setup(keycarry)
    --initilize the screen positions
-
-   dcp.setup()
+   
    keycarry = plain.setup(keycarry)
    awful.screen.connect_for_each_screen(function(s)
       
@@ -338,6 +339,8 @@ local function setup(keycarry)
 
       s.detatched = false
       step_screen(s,{0,0}) --trick to focus on the first tag on the given screen
+
+      s:connect_signal("arrange",dcp.setup)
    end)
    return gears.table.join(keycarry,
                   awful.key({"Mod1","Control"},"d",function()
