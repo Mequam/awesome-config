@@ -63,19 +63,9 @@ local function setup(s2)
          layout = wibox.layout.stack
       }
 
-      data = {
-         x=s.geometry.x,
-         y=s.geometry.y,
-         width=s.geometry.width,
-         height=s.geometry.height
-      }
-
       text_wibox.x = s.workarea.x + (s.workarea.width - text_wibox.width) / 2
       text_wibox.y = s.workarea.y + (s.workarea.height - text_wibox.height) / 2
 
-      --awful.placement.centered(text_wibox, {
-      --   parent = data --make sure its per screen
-      --})
 
       s.dak_center_prompt = text_prompt
       s.dak_center_prompt_container = text_wibox
