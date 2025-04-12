@@ -45,13 +45,14 @@ function get_topic_options(screen)
 end
 
 --adds virtual desktop tags that are contain a topic to the given
---screen
+--screen note that we use the index of the screen to determine the
+--screens layout
 local function add_topic_tags(topic,s)
    local tags = plain.create_tags()
    for i=1,#tags do
       local t = awful.tag.add(topic .. "-" .. tags[i], {
                      screen = s,
-                     layout = awful.layout.suit.tile
+                     layout = awful.layout.layouts[s.index]
                   })
       table.insert(s.topics[topic].tags,t)
    end
