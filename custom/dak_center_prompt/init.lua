@@ -15,7 +15,11 @@ local function dak_center_prompt(prompt,callback)
                            callback(data)
                            screen.dak_center_prompt_container.visible = false
                        end,
-        history_path = awful.util.get_cache_dir() .. "/history_eval"
+        history_path = awful.util.get_cache_dir() .. "/history_eval",
+        hooks = {{{},"Escape",function () --cancel the prompt
+            screen.dak_center_prompt_container.visible = false
+            screen.dak_center_prompt_container.text = ""
+        end}}
       }
    end
 
