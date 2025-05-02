@@ -24,7 +24,7 @@ function sync_grid(grid,pos)
    end
 end
 -- syncs the grid to the given position
-function create_grid(grid)
+function create_grid(grid,width,height)
    for y = 1, PLAIN_DIMENSIONS[2] do
       for x = 1, PLAIN_DIMENSIONS[1] do
          print(x-1,y-1)
@@ -60,8 +60,8 @@ function create_grid(grid)
          local color_box = wibox.container.background()
          color_box.widget = text_box
          color_box.bg = "#0000FF"
-         color_box.forced_width = 40
-         color_box.forced_height = 20
+         color_box.forced_width = width
+         color_box.forced_height = height
          color_box.focusable = false
 
          grid:add(color_box)
@@ -96,13 +96,13 @@ end
 
 --takes the screen that the grid widget will be on
 --and returns the widget
-function create_grid_widget(grid_screen)
+function create_grid_widget(grid_screen,width,height)
    local grid = wibox.layout.grid()
    grid.forced_num_cols = 2
-   grid.spacing = 5
+   grid.spacing = 3
    grid.focusable = false
 
-   create_grid(grid)
+   create_grid(grid,width,height)
 
    sync_grid(grid,grid_screen.topics[grid_screen.topic].position)
 

@@ -379,7 +379,7 @@ awful.screen.connect_for_each_screen(function(s)
     s.mywibox = awful.wibar({ position = "top", screen = s })
 
 
-    s.grid_display = vdesk_wibox.create_grid_widget(s)
+    s.grid_display = vdesk_wibox.create_grid_widget(s,17,11)
 
     -- Add widgets to the wibox
     s.mywibox:setup {
