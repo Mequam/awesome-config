@@ -69,20 +69,9 @@ function create_grid(grid)
    end
 end
 
-
-function setup()
-   focused_screen = awful.screen.focused()
-
-   local grid = wibox.layout.grid()
-   grid.forced_num_cols = 2
-   grid.spacing = 5
-   grid.focusable = false
-   if not focused_screen then return end
-
-   create_grid(grid)
-
-   sync_grid(grid,focused_screen.topics[focused_screen.topic].position)
-
+--debug function that creates a popup with the
+--display grid
+function grid_popup(grid)
 
    local grid_popup = awful.popup {
       widget =
@@ -103,21 +92,38 @@ function setup()
        minimum_height = 300,
        focusable = false
    }
+end
+
+--takes the screen that the grid widget will be on
+--and returns the widget
+function create_grid_widget(grid_screen)
+   local grid = wibox.layout.grid()
+   grid.forced_num_cols = 2
+   grid.spacing = 5
+   grid.focusable = false
+
+   create_grid(grid)
+
+   sync_grid(grid,grid_screen.topics[grid_screen.topic].position)
+
+
 
 
    awesome.connect_signal("plain::walk",function (step_dir)
       gears.timer.delayed_call(function ()
-         focused_screen = awful.screen.focused()
-         sync_grid(grid,focused_screen.topics[focused_screen.topic].position)
+         grid_screen = awful.screen.focused()
+         sync_grid(grid,grid_screen.topics[grid_screen.topic].position)
 
          -- force re-draw
-         grid_popup.visible = false
-         grid_popup.visible = true
+         grid.visible = false
+         grid.visible = true
       end)
    end)
+
+   return grid
 end
 
 M = {}
-M.setup = setup
+M.create_grid_widget = create_grid_widget
 
 return M
