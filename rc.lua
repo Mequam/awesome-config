@@ -249,10 +249,6 @@ local spaced_useless_gap = true
 globalkeys = gears.table.join(
     awful.key({ modkey,           }, "s",      hotkeys_popup.show_help,
               {description="show help", group="awesome"}),
-    awful.key({ modkey,           }, "Left",   awful.tag.viewprev,
-              {description = "view previous", group = "tag"}),
-    awful.key({ modkey,           }, "Right",  awful.tag.viewnext,
-              {description = "view next", group = "tag"}),
     awful.key({ modkey,           }, "Escape", awful.tag.history.restore,
               {description = "go back", group = "tag"}),
 
@@ -276,7 +272,7 @@ globalkeys = gears.table.join(
               {description = "swap with next client by index", group = "client"}),
     awful.key({ "Mod1", "Mod4"   }, "Right", function () awful.client.swap.byidx( -1)    end,
               {description = "swap with previous client by index", group = "client"}),
-    awful.key({"Control", "Shift"}, "Left", function () awful.screen.focus_relative( 1) end,
+    awful.key({"Mod4"}, "Left", function () awful.screen.focus_relative( 1) end,
               {description = "focus the next screen", group = "screen"}),
     awful.key({"Mod4","Shift"}, "g", function ()  
        if spaced_useless_gap then
@@ -313,7 +309,7 @@ globalkeys = gears.table.join(
        spaced_useless_gap = not spaced_useless_gap
     end),
 
-    awful.key({"Control", "Shift"}, "Right", function () awful.screen.focus_relative(-1) end,
+    awful.key({"Mod4"}, "Right", function () awful.screen.focus_relative(-1) end,
               {description = "focus the previous screen", group = "screen"}),
     awful.key({ modkey,           }, "u", awful.client.urgent.jumpto,
               {description = "jump to urgent client", group = "client"}),
@@ -592,4 +588,4 @@ client.connect_signal("unfocus", function(c) c.border_color = beautiful.border_n
 -- limit those massive notifications
 beautiful.notification_icon_size = 70
 
-vdesk_wibox.setup()
+--vdesk_wibox.setup()

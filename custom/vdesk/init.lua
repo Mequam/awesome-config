@@ -367,16 +367,16 @@ local function setup(keycarry)
                   ),
                   --move a window with you over virtual desktops
                   --gotta really GRAB the window to move it
-                  awful.key({"Mod4","Mod1","Shift","Control"},"Left", function ()
+                  awful.key({"Mod4","Mod1","Control"},"Left", function ()
                      step_screen_with_window_d(awful.screen.focused(),{-1,0})
                   end),
-                  awful.key({"Mod4","Mod1","Shift","Control"},"Right", function ()
+                  awful.key({"Mod4","Mod1","Control"},"Right", function ()
                      step_screen_with_window_d(awful.screen.focused(),{1,0})
                   end),
-                  awful.key({"Mod4","Mod1","Shift","Control"},"Down", function ()
+                  awful.key({"Mod4","Mod1","Control"},"Down", function ()
                      step_screen_with_window_d(awful.screen.focused(),{0,-1})
                   end),
-                  awful.key({"Mod4","Mod1","Shift","Control"},"Up", function ()
+                  awful.key({"Mod4","Mod1","Control"},"Up", function ()
                      step_screen_with_window_d(awful.screen.focused(),{0,1})
                   end),
 
@@ -384,7 +384,7 @@ local function setup(keycarry)
                   --equivilent in the modulus space we move in, but it pays to have
                   --consistency :D
                   
-                  awful.key({"Mod4","Control"},"q",function ()
+                  awful.key({"Mod4","Control"},"Up",function ()
                      local client_to_move = client.focus
                      local screen = awful.screen.focused()
                      if client_to_move and screen then
@@ -408,7 +408,7 @@ local function setup(keycarry)
                   end
                   ),
 
-                  awful.key({"Mod4"},"q",function()
+                  awful.key({"Mod4"},"Up",function()
 
                      local screen = awful.screen.focused()
 
