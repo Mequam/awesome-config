@@ -111,7 +111,6 @@ function create_grid_widget(grid_screen,width,height)
 
    awesome.connect_signal("plain::walk",function (step_dir)
       gears.timer.delayed_call(function ()
-         grid_screen = awful.screen.focused()
          sync_grid(grid,grid_screen.topics[grid_screen.topic].position)
 
          -- force re-draw

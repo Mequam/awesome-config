@@ -74,6 +74,8 @@ local function step_screen(screen,step_dir)
       dak_global_point = screen.topics[screen.topic].position
    end
 
+   awesome.emit_signal("plain::walk",step_dir)
+
    if tag then
       tag:view_only()
       return tag
@@ -187,10 +189,10 @@ end
 
 --called when the user wants to walk along the current
 --desktop plain
-awesome.connect_signal("plain::walk",function (step_dir)
-   detachify(step_screen,awful.screen.focused(),step_dir)
-end
-)
+--awesome.connect_signal("plain::walk",function (step_dir)
+--   detachify(step_screen,awful.screen.focused(),step_dir)
+--end
+--)
 --creates a topic and adds its tags to a given screen
 local function create_topic(topic,s)
    if not s.topics then
@@ -328,7 +330,6 @@ end
 local function setup(keycarry)
    --initilize the screen positions
    
-   keycarry = plain.setup(keycarry)
    awful.screen.connect_for_each_screen(function(s)
       
       s.topics = {}
@@ -343,7 +344,22 @@ local function setup(keycarry)
 
       s:connect_signal("arrange",dcp.setup)
    end)
+   
+   move_key = {"Mod1","Control"}
+
    return gears.table.join(keycarry,
+         awful.key(move_key,"Up",function ()
+            detachify(step_screen,awful.screen.focused(),{0,1})
+         end),
+         awful.key(move_key,"Down",function ()
+            detachify(step_screen,awful.screen.focused(),{0,-1})
+         end),
+         awful.key(move_key,"Left",function ()
+            detachify(step_screen,awful.screen.focused(),{-1,0})
+         end),
+         awful.key(move_key,"Right",function ()
+            detachify(step_screen,awful.screen.focused(),{1,0})
+         end),
                   awful.key({"Mod1","Control"},"d",function()
                      detach(awful.screen.focused())
                   end),

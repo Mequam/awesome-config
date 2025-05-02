@@ -18,25 +18,6 @@ local function add_mod(plain_position,step)
          )
 end
 
---sets up the keys for walking around the plain
-local function setup(keyset)
-   --setup movement keys
-   return gears.table.join(keyset,
-         awful.key(move_key,"Up",function ()
-            awesome.emit_signal("plain::walk",{0,1})
-         end),
-         awful.key(move_key,"Down",function ()
-            awesome.emit_signal("plain::walk",{0,-1})
-         end),
-         awful.key(move_key,"Left",function ()
-            awesome.emit_signal("plain::walk",{-1,0})
-         end),
-         awful.key(move_key,"Right",function ()
-            awesome.emit_signal("plain::walk",{1,0})
-         end),
-         awful.key({"Mod1","Mod4","Shift","Control"})
-   )
-end
 --takes in a vector and returns an
 --integer mapping for that vector
 --this is inteanded to be the array mapping for the vector
