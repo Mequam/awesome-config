@@ -592,3 +592,9 @@ client.connect_signal("unfocus", function(c) c.border_color = beautiful.border_n
 
 -- limit those massive notifications
 beautiful.notification_icon_size = 70
+
+awful.spawn.with_shell(
+    'if (xrdb -query | grep -q "^awesome\\.started:\\s*true$"); then exit; fi;' ..
+    'xrdb -merge <<< "awesome.started:true";' ..
+    'dex --environment Awesome --autostart --search-paths "${XDG_CONFIG_HOME:-$HOME/.config}/autostart:${XDG_CONFIG_DIRS:-/etc/xdg}/autostart";'
+    )
